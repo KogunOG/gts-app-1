@@ -13,17 +13,21 @@ app.use(cors());
 
 dotenv.config({ path: './.env'})
 const publicDir = path.join(__dirname, './public')
-app.use(express.static(publicDir))
-// Parse URL-encoded bodies (as sent by HTML forms)
-app.use(express.urlencoded({ extended: false }))
+
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json())
 
-app.set('view engine', 'hbs')
 
+// app.use('/', require('./routes/pages'))
+app.use('/auth', require('./routes/user_routes'))
 
-app.use('/', require('./routes/pages'))
-app.use('/auth', require('./routes/auth'))
+app.use(function (error, req, res, next) {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode
+    res.status(statusCode)
+    res.json({
+      message: error.message,
+    })
+  })
 
 app.listen(5000)
 
