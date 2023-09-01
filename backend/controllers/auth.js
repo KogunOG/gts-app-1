@@ -67,33 +67,34 @@ exports.login = asynchandler( async(req, res) => {
   const {email, password} = await req.body;
 
   db.query(
-    "SELECT email, password FROM users WHERE email = ?",
+    "SELECT * FROM users WHERE email = ?",
     [email],
     async (error, results) => {
       if (error) {
         console.log(error);
       }
-      // if (results.length == 0) {
-      //   return res.json({
-      //     message: "YOu entered incorrect email",
-          
-      //   })
-      // }
-      if (results) {
-        return res.json(
-          results
-        )
+      else{
+        bcrypt.compare(password, results[0].password, (err, resp) => {
+          if (err){
+            console.log(err)
+            res.end()
+          }
+          if (resp) {
+            const token = jwt.sign({userID: results[0].id}, process.env.SECRET)
+            return res.json({
+              roleid: results[0].role,
+              userid: results[0].id,
+              token
+            })
+          } 
+          else{
+            return res.json({
+              message : "pass no match!! "
+            })
+          }
+        });
       }
-      // bcrypt.compare(password, results.password, (err, res) => {
-      //   if (err){
-      //     console.log(error)
-      //   }
-      //   if (res) {
-      //     return res.json({
-      //       message : "pass match!! "
-      //     })
-      //   } 
-      // });
+      
     }
     
     )
