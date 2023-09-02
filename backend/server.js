@@ -20,6 +20,7 @@ app.use(express.json())
 
 // app.use('/', require('./routes/pages'))
 app.use('/auth', require('./routes/user_routes'))
+app.use('/sales', require('./routes/sales_routes'))
 
 app.use(function (error, req, res, next) {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode
