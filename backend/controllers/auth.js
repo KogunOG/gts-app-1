@@ -4,9 +4,6 @@ const bcrypt = require("bcryptjs");
 const asynchandler = require("express-async-handler")
 
 
-const {check} = require('express-validator')
-
-
 exports.register_user = asynchandler(async (req, res) => {
   console.log(req.body);
 
@@ -46,7 +43,7 @@ exports.register_user = asynchandler(async (req, res) => {
 exports.getroles = (req, res) => {
 
   db.query(
-    "SELECT * from role_db",
+    "SELECT * from role_tb",
     async (error, results) => {
       if (error) {
         console.log(error);
