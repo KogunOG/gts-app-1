@@ -4,11 +4,13 @@ const db = require("../utils/db")
 exports.isAuthorized  = async (req, res, next) =>{
     try {
         if(req.headers && req.headers.authorization){
-            const token = req.headers.authorization.split(' ')[1];
+            
+            const token = req.headers.authorization;
             const decode = jwt.verify(token, process.env.SECRET);
+      
             const uid = decode.userID
-            console.log(decode)
-
+          const roleGiven = decode.userRole
+         
             db.query(
                 "SELECT * FROM users WHERE id = ?",
                 [decode.userID],
@@ -18,6 +20,7 @@ exports.isAuthorized  = async (req, res, next) =>{
                     }
                     if (results) {
                         req.uid = uid
+                        req.roleofUser = roleGiven
                         next()
                     }
                   }

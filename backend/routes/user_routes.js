@@ -12,6 +12,8 @@ router.get('/register', authController.getroles)
 
 router.post('/login', ValidateUserLogin,userVlidation, authController.login)
 
+router.get('/Roleredirector',isAuthorized,authController.redirectUserAccordingToRole)
+
 router.post('/priv', isAuthorized)
 
 module.exports = router
