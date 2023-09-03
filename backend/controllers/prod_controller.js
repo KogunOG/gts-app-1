@@ -18,7 +18,10 @@ exports.new_get_proj = (req,res) => {
 }
 exports.ong_get_proj = (req,res) => {
     db.query(
-        "SELECT * from new_project WHERE mtn = 0",
+      `SELECT new_project.np_id,sales.Client
+         FROM new_project
+        INNER JOIN sales ON new_project.sales_client_id = sales.p_id
+        WHERE new_project.mtn = 0`,
         async (error, results) => {
           if (error) {
             console.log(error);
@@ -29,7 +32,7 @@ exports.ong_get_proj = (req,res) => {
             })
           }
           else{
-            res.json({ message: "No projects here!"})
+            res.json({ message: "No projects here in exec!"})
           }
           
         }
@@ -37,20 +40,25 @@ exports.ong_get_proj = (req,res) => {
 }
 exports.exec_get_proj = (req,res) => {
  
-    db.query(
-        "SELECT * from ongoing_projects",
-        async (error, results) => {
-          if (error) {
-            console.log(error);
-          }
-          if (results) {
-            res.json({
-              results
-            })
-          }
+  db.query(
+    `SELECT  o.on_p_id, s.Client
+      FROM (ongoing_projects o JOIN new_project n ON o.np_id = n.np_id AND o.mtn=0)
+      JOIN sales s ON n.sales_client_id = s.p_id`,
+      async (error, results) => {
+        if (error) {
+          console.log(error);
+        }
+        if (results) {
+          res.json({
+            results
+          })
+        }
+        else{
           res.json({ message: "No projects here!"})
         }
-      )
+        
+      }
+    )
 }
 
 exports.new_post_proj = async (req,res) => {
@@ -147,7 +155,7 @@ exports.exec_post_proj = async (req,res) => {
       } else {
         //removing from get req of exec_projects
         db.query(   
-          "UPDATE ongoing_projects SET mtn = '1' WHERE np_id = ?",
+          "UPDATE ongoing_projects SET mtn = '1' WHERE on_p_id = ?",
           [ongoing_id],
           (error, results) => {
             if (error) {

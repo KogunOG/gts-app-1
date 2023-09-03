@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const asynchandler = require("express-async-handler");
 
 exports.register_user = asynchandler(async (req, res, next) => {
-  const { email, password, name, selectedRole } = await req.body;
+  const { email, password, username, role } = await req.body;
 
   db.query(
     "SELECT email FROM users WHERE email = ?;",
@@ -24,22 +24,22 @@ exports.register_user = asynchandler(async (req, res, next) => {
           "INSERT INTO users SET ?",
           {
             email: email,
-            role: selectedRole,
+            role: role,
             password: hashpass,
-            username: name,
+            username: username,
           },
           (error, results) => {
             if (error) {
               console.log(error);
             } else {
               const token = jwt.sign(
-                { userID: results.insertId, userRole: selectedRole },
+                { userID: results.insertId, userRole: role },
                 process.env.SECRET
               );
               return res.json({
                 Verifytoken: token,
-                displayName: name,
-                roleName: selectedRole,
+                displayName: username,
+                roleName: role,
               });
             }
           }
@@ -112,7 +112,7 @@ exports.redirectUserAccordingToRole = asynchandler(async (req, res, next) => {
   try {
     const userID = req.userID;
     const roleName = req.roleofUser;
-
+    console.log(roleName)
     if (roleName === "sales") {
       db.query("SELECT * FROM sales", async (error, results) => {
         if (error) {
@@ -139,6 +139,7 @@ exports.redirectUserAccordingToRole = asynchandler(async (req, res, next) => {
       //     }
       //   }
       // );
+      // console.log("hitting prod_head_landing page")
       db.query(
         "SELECT * from sales WHERE mtn = 0",
         async (error, results) => {
@@ -156,23 +157,8 @@ exports.redirectUserAccordingToRole = asynchandler(async (req, res, next) => {
           
         }
       )
-    } else if (roleName == "sales") {
-      db.query("SELECT * from sales WHERE mtn = 0", async (error, results) => {
-        if (error) {
-          const err = new Error("Your role does'nt exist");
-          res.status(404);
-          next(err);
-        } else {
-          res.json({
-            results,
-          });
-        }
-      });
-    } else {
-      const error = new Error("No match");
-      res.status(404);
-      next(error);
-    }
+    
+    } 
   } catch (err) {
     const error = new Error("Somethin went wrong!");
     res.status(404);

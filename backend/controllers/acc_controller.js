@@ -4,7 +4,11 @@ const db = require('../utils/db')
 exports.acc_get_projects = (req,res) =>{
 
     db.query(
-        "SELECT * from execution",
+      `SELECT  e.ex_id,e.completed, s.Client
+      FROM execution e 
+      JOIN ongoing_projects o ON e.ongoing_id = o.on_p_id
+      JOIN new_project n ON o.np_id = n.np_id
+      JOIN sales s ON n.sales_client_id = s.p_id`,
         async (error, results) => {
           if (error) {
             console.log(error);
@@ -20,21 +24,32 @@ exports.acc_get_projects = (req,res) =>{
 }
 
 exports.acc_post_projects = async (req, res ) =>{
-    const { exec_id, Payement_Recd_file, Payement_Recd_Date, Remark } = await req.body;
+    const { exec_id, Payment_recd_file, payment_recd_date, remarks } = await req.body;
 
   db.query(   
-    "INSERT INTO sales SET ?",
+    "INSERT INTO accounts SET ?",
     { 
         exec_id,
-        Payement_Recd_file,
-        Payement_Recd_Date,
-        Remark
+        Payment_recd_file,
+        payment_recd_date,
+        remarks
     },
     (error, results) => {
       if (error) {
         console.log(error);
       } else {
-        res.json({ success: "Project is now 100% complete" });
+        db.query(   
+          "UPDATE execution SET completed = '1' WHERE ex_id = ?",
+          [exec_id],
+          (error, results) => {
+            if (error) {
+              console.log(error);
+            } 
+            return res.json({ success: "PROJECT IS 100% COMPLETE!!!" });
+            
+          }
+          
+        );
         p_id = results
       }
     }
